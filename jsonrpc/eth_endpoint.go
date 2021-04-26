@@ -431,7 +431,7 @@ func (e *Eth) GetBalance(address types.Address, number BlockNumber) (interface{}
 	}
 	acc, err := e.d.store.GetAccount(header.StateRoot, address)
 	if err != nil {
-		return nil, err
+		return "0x0", nil
 	}
 	return argBigPtr(acc.Balance), nil
 }

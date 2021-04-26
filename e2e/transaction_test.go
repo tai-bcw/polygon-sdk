@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"fmt"
 	"math/big"
 	"testing"
 	"time"
@@ -82,6 +83,75 @@ func ethToWei(ethValue int64) *big.Int {
 	return new(big.Int).Mul(
 		big.NewInt(ethValue),
 		new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
+}
+
+func TestEthTransferX(t *testing.T) {
+	//cc := 20282409603651670345027227220016 - 20282409603651670305567215187016
+	//fmt.Println(cc)
+
+	fr := framework.NewTestServerFromGenesis(t)
+
+	from := web3.Address(fr.Config.PremineAccts[0].Addr)
+	to := web3.Address(types.Address{0x1})
+
+	// 39460012033000
+
+	// 0x100000000000000000000000000
+	// defBalance, _ := new(big.Int).SetString("20282409603651670423947251286016", 10)
+
+	client := fr.JSONRPC().Eth()
+
+	/*
+		checkBalance := func(addr web3.Address, balance *big.Int) {
+			found, err := client.GetBalance(addr, web3.Latest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if found.Cmp(balance) != 0 {
+				fmt.Println(found)
+				fmt.Println(balance)
+				t.Fatal("bad")
+			}
+		}
+	*/
+
+	fmt.Println("-- before --")
+	fromBefore, err := client.GetBalance(from, web3.Latest)
+	assert.NoError(t, err)
+
+	fmt.Println(fromBefore)
+	fmt.Println(client.GetBalance(to, web3.Latest))
+
+	//checkBalance(from, big.NewInt(0))
+	//checkBalance(to, defBalance)
+
+	value := big.NewInt(1000)
+
+	// perform a transfer
+	receipt, err := fr.SendTxn(&web3.Transaction{
+		From:     from,
+		To:       &to,
+		Value:    value,
+		GasPrice: 100,
+		Gas:      100,
+	})
+	assert.NoError(t, err)
+
+	fmt.Println("-- receipt --")
+	fmt.Println(receipt)
+
+	fmt.Println("-- after --")
+	fromAfter, err := client.GetBalance(from, web3.Latest)
+	assert.NoError(t, err)
+
+	fmt.Println(fromAfter)
+	fmt.Println(client.GetBalance(to, web3.Latest))
+
+	diff := big.NewInt(1).Sub(fromBefore, fromAfter)
+
+	fmt.Println("-- balance diff --")
+	fmt.Println(diff)
+
 }
 
 func TestEthTransfer(t *testing.T) {

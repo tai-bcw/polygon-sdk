@@ -248,23 +248,6 @@ func (t *Transition) Commit() (Snapshot, types.Hash) {
 	return s2, types.BytesToHash(root)
 }
 
-// Block rewards at different forks
-var (
-	// FrontierBlockReward is the block reward for the Frontier fork
-	FrontierBlockReward = big.NewInt(5e+18)
-
-	// ByzantiumBlockReward is the block reward for the Byzantium fork
-	ByzantiumBlockReward = big.NewInt(3e+18)
-
-	// ConstantinopleBlockReward is the block reward for the Constantinople fork
-	ConstantinopleBlockReward = big.NewInt(2e+18)
-)
-
-var (
-	big8  = big.NewInt(8)
-	big32 = big.NewInt(32)
-)
-
 func buildLogs(logs []*types.Log, txHash, blockHash types.Hash, txIndex uint) []*types.Log {
 	newLogs := []*types.Log{}
 
@@ -430,6 +413,11 @@ func (t *Transition) apply(msg *types.Transaction) ([]byte, uint64, bool, error)
 	// refund the sender
 	remaining := new(big.Int).Mul(new(big.Int).SetUint64(gasLeft), gasPrice)
 	txn.AddBalance(msg.From, remaining)
+
+	fmt.Println("-- gas used --")
+	fmt.Println(remaining)
+	fmt.Println(gasUsed)
+	fmt.Println(gasPrice)
 
 	// pay the coinbase
 	coinbaseFee := new(big.Int).Mul(new(big.Int).SetUint64(gasUsed), gasPrice)
